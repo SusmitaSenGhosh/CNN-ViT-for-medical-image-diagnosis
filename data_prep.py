@@ -5,10 +5,11 @@ import cv2
 from PIL import Image 
 import random
 
-save_path = 'C:/Users/susmi/OneDrive/Desktop/test/data/'
+data_path = 'D:/data/raw/' #specifify path for raw data
+save_path = 'D:/data/processed/' #specifify path for processed data
 #%% ISIC18
-path = 'D:/Simpi/data/retinopathy/isic18/ISIC2018_Task3_Training_Input'
-csv_path = 'D:/Simpi/data/retinopathy/isic18/ISIC_grounfthruth.csv'
+path = data_path+'/isic18/ISIC2018_Task3_Training_Input'
+csv_path = data_path+'/isic18/ISIC_grounfthruth.csv'
 
 classes = [0,1,2,3,4]
 file_name = []
@@ -32,7 +33,7 @@ np.savez(save_path+'/isic18/sample_normalized.npz', x, y,file_name)
 
 #%% colorectal hist
 
-path = 'D:/Simpi/data/retinopathy/Kather_texture_2016_image_tiles_5000'
+path = data_path+'/col_hist/Kather_texture_2016_image_tiles_5000'
 x = []
 y = []
 dirs = os.listdir(path)
@@ -88,11 +89,11 @@ def preprocess_image(path, sigmaX=10):
     return image
 
 
-path = 'D:/Simpi/data/retinopathy/kaggle_diabetic_ratinopathy/train/'
+path = data_path + '/kaggle_diabetic_ratinopathy/train/'
 classes = [0,1,2,3,4]
 file_name = []
 class_name = []
-with open('D:/Simpi/data/retinopathy/kaggle_diabetic_ratinopathy/trainLabels.csv') as csv_file:
+with open(data_path+'/kaggle_diabetic_ratinopathy/trainLabels.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
@@ -122,15 +123,15 @@ for i in indices_list:
     count = count +1
 
 
-np.savez(save_path+'/kaggle_diabetic_ratinopathy/sample_no_prepro.npz', x, y,file_name,file_name,indices_list)
+np.savez(save_path+'/DR/sample_no_prepro.npz', x, y,file_name,file_name,indices_list)
 
-#%%    chestray2
+#%%    chestxray2
 
 classes = [0,1]
 y = []
 count = 0
 class_count = 0
-path = 'D:/Simpi/data/retinopathy/chest_xray/train'
+path = data_path+'/chest_xray/train'
 folders = ['NORMAl','PNEUMONIA']
 for folder in folders:
     file_name = os.listdir(os.path.join(path,folder))
@@ -144,14 +145,14 @@ for folder in folders:
         count += 1
         print(count)
     class_count += 1
-np.savez(save_path+'/chest_xray/train.npz', x, y,file_name)
+np.savez(save_path+'/chestxray2/train.npz', x, y,file_name)
 
 
 classes = [0,1]
 y = []
 count = 0
 class_count = 0
-path = 'D:/Simpi/data/retinopathy/chest_xray/test'
+path = data_path+'/chest_xray/test'
 folders = ['NORMAl','PNEUMONIA']
 for folder in folders:
     file_name = os.listdir(os.path.join(path,folder))
@@ -165,7 +166,7 @@ for folder in folders:
         count += 1
         print(count)
     class_count += 1
-np.savez(save_path+'/chest_xray/test.npz', x, y,file_name)
+np.savez(save_path+'/chestxray2/test.npz', x, y,file_name)
 #%% BHI
 
 
@@ -204,11 +205,62 @@ def get_data(data_folder_path,classes, folders):
 
 
 random.seed(0)
-data_folder_path = 'C:/Users/susmi/data/IDC'
+data_folder_path = data_path+'/IDC'
 no_folders = 15
 classes = ['0','1']
 all_folders = os.listdir(data_folder_path)
 folders = random.sample(all_folders,no_folders)
 data, labels = get_data(data_folder_path,classes, folders)
-np.savez(save_path+'/IDC_train_test/sample224.npz', data, labels)
-#%%
+np.savez(save_path+'/BHI/sample224.npz', data, labels)
+
+#%% chestxray1
+
+details = np.loadtxt(data_path+'/chestxray1/train_split_v3.txt', comments="#", delimiter=" ",dtype=str)
+random.seed(0)
+val_index = random.sample(range(0, details.shape[0]), int(details.shape[0]*0.25))
+train_index = list(set(range(0, details.shape[0]))-set(val_index))
+
+with open(data_path+"/chestxray1/val_file.txt","a+") as val_file, open(data_path+"/chestxray1/train_file.txt","a+") as train_file: 
+    for f in range(0,int(details.shape[0])):
+        if f in val_index:    
+            val_file.write(details[f,0] + " " + details[f,1] + " " + details[f,2] + " " + details[f,3]+'\n')
+        else:
+            train_file.write(details[f,0] + " " + details[f,1] + " " + details[f,2] + " " + details[f,3]+'\n')
+    val_file.close()
+    train_file.close()
+
+def crop_top(img, percent=0.15):
+    offset = int(img.shape[0] * percent)
+    return img[offset:]
+
+def central_crop(img):
+    size = min(img.shape[0], img.shape[1])
+    offset_h = int((img.shape[0] - size) / 2)
+    offset_w = int((img.shape[1] - size) / 2)
+    return img[offset_h:offset_h + size, offset_w:offset_w + size]
+
+def process_image_file(filepath, top_percent, size):
+    img = cv2.imread(filepath)
+    img = crop_top(img, percent=top_percent)
+    img = central_crop(img)
+    img = cv2.resize(img, (size, size))
+    return img
+
+def preprocess_data(filepath,top_percent,size):
+    x = process_image_file(filepath, top_percent, size)
+    x = x.astype('float32') / 255.0
+    return x
+
+
+top_percent = 0.08
+size = 224
+datadir = data_path+'/chestxray1/'
+save_dir = save_path+'/chestxray1/'
+
+files = os.listdir(datadir)
+for file in files:
+    print(folder, file)
+    image = preprocess_data(datadir+'/'+file,top_percent,size)
+    image = image*255
+    image = image.astype(np.uint8)
+    cv2.imwrite(save_dir+'/'+file,image)

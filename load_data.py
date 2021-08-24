@@ -116,8 +116,8 @@ def load_data(data_name):
         trainS, testS, labelTr, labelTs = train_test_split(data, label, test_size=0.2, random_state=0,shuffle=True)
         del data, label
     elif data_name == 'DR':
-        path = 'C:/Users/susmi/OneDrive/Desktop/test/data/'
-        temp = np.load(path+'/kaggle_diabetic_ratinopathy/sample.npz')
+        path = 'D:/data/processed/'
+        temp = np.load(path+'/DR/sample.npz')
         data = temp['arr_0']
         label = np.asarray(temp['arr_1'])
         for n, i in enumerate(label):
@@ -129,8 +129,8 @@ def load_data(data_name):
         del data, label
         
     elif data_name == 'Col_Hist':
-        path = 'C:/Users/susmi/OneDrive/Desktop/test/data/'
-        temp = np.load(path+'/Kather_texture_2016_image_tiles_5000/sample_normalized.npz')
+        path = 'D:/data/processed/'
+        temp = np.load(path+'/col_hist/sample_normalized.npz')
         data = temp['arr_0']
         #label = np.asarray(temp['arr_1'])
         label = temp['arr_1'] 
@@ -139,7 +139,7 @@ def load_data(data_name):
         trainS, testS, labelTr, labelTs = train_test_split(data, label, test_size=0.2, random_state=0,shuffle=True)
         del data, label
     elif data_name == 'ISIC18':
-        path = 'C:/Users/susmi/OneDrive/Desktop/test/data/'
+        path = 'D:/data/processed/'
         temp = np.load(path+'/isic18/sample_normalized.npz')
         data = temp['arr_0']
         #label = np.asarray(temp['arr_1'],dtype = np.uint8)
@@ -170,10 +170,10 @@ def load_data(data_name):
             weights = [element / sum(weights) for element in weights]
             return np.asarray(x,dtype = np.float32)/255, to_categorical(np.asarray(y,dtype = np.float32)), weights
 
-        train_txt = 'D:/Simpi/Work/COVID19/For_paper/txtfiles/train_txt_v2.txt'
-        val_txt = 'D:/Simpi/Work/COVID19/For_paper/txtfiles/val_txt_v2.txt'
-        test_txt = 'D:/Simpi/Work/COVID19/For_paper/txtfiles/test_COVIDx4.txt'
-        preprocessed_image_path = 'C:/Users/susmi/data/all_images/'
+        train_txt = 'D:/data/raw/chestxray1/train_txt_v2.txt'
+        val_txt = 'D:/data/raw/chestxray1/val_txt_v2.txt'
+        test_txt = 'D:/data/raw/chestxray1/test_COVIDx4.txt'
+        preprocessed_image_path = 'D:/data/processed/chestxray1/'
 
         with open(test_txt, 'r') as fr:
              test_files = fr.readlines()
@@ -192,20 +192,20 @@ def load_data(data_name):
 
 
     elif data_name == 'chestxray2':
-        path = 'C:/Users/susmi/OneDrive/Desktop/test/data/'
-        temp = np.load(path+'/chest_xray/train.npz')
+        path = 'D:/data/processed/'
+        temp = np.load(path+'/chestxary2/train.npz')
         trainS = temp['arr_0']
         labelTr = np.asarray(temp['arr_1'],dtype = np.uint8)
         del temp
 
-        temp = np.load(path+'/chest_xray/test.npz')
+        temp = np.load(path+'/chestxray2/test.npz')
         testS = temp['arr_0']
         labelTs = np.asarray(temp['arr_1'],dtype = np.uint8)
         del temp
         
     elif data_name == 'BHI':
-        path = 'C:/Users/susmi/OneDrive/Desktop/test/data/'
-        temp = np.load(path+'/IDC_train_test/sample224.npz')
+        path = 'D:/data/processed/'
+        temp = np.load(path+'/BHI/sample224.npz')
         data = temp['arr_0']
         #label = np.asarray(temp['arr_1'])
         label = temp['arr_1'] 
